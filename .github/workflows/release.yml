@@ -105,15 +105,35 @@ jobs:
           TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
           TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
 
-      - name: Upload artifacts
+      - name: List build outputs
+        shell: bash
+        run: |
+          echo "=== Build output directory ==="
+          ls -R src-tauri/target/${{ matrix.target }}/release/bundle/ || true
+          echo ""
+          echo "=== All package files ==="
+          find src-tauri/target/${{ matrix.target }}/release -type f \( -name "*.msi" -o -name "*.msi.zip" -o -name "*.dmg" -o -name "*.app.tar.gz" -o -name "*.AppImage" -o -name "*.deb" \) || true
+
+      - name: Upload artifacts (Windows)
+        if: matrix.os == 'windows-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: claw-config-${{ matrix.target }}
+          path: src-tauri/target/${{ matrix.target }}/release/bundle/msi/*.msi
+          retention-days: 7
+          if-no-files-found: warn
+
+      - name: Upload artifacts (Unix)
+        if: matrix.os != 'windows-latest'
         uses: actions/upload-artifact@v4
         with:
           name: claw-config-${{ matrix.target }}
           path: |
-            src-tauri/target/${{ matrix.target }}/release/bundle/*
-            !src-tauri/target/${{ matrix.target }}/release/bundle/**/*.dSYM/**
-            !src-tauri/target/${{ matrix.target }}/release/bundle/**/*.deb/**
-            !src-tauri/target/${{ matrix.target }}/release/bundle/**/debian/**
+            src-tauri/target/${{ matrix.target }}/release/bundle/*.dmg
+            src-tauri/target/${{ matrix.target }}/release/bundle/*.app.tar.gz
+            src-tauri/target/${{ matrix.target }}/release/bundle/*.AppImage
+            src-tauri/target/${{ matrix.target }}/release/bundle/*.AppImage.tar.gz
+            src-tauri/target/${{ matrix.target }}/release/bundle/*.deb
           retention-days: 7
           if-no-files-found: warn
 
@@ -187,11 +207,19 @@ jobs:
         with:
           path: ./artifacts
 
+      - name: List downloaded artifacts
+        run: |
+          echo "=== All downloaded files ==="
+          find ./artifacts -type f
+          echo ""
+          echo "=== Files by extension ==="
+          find ./artifacts -type f -name "*.msi" -o -name "*.msi.zip" -o -name "*.app.tar.gz" -o -name "*.dmg" -o -name "*.AppImage" -o -name "*.deb" || true
+
       - name: Prepare release assets
         run: |
           mkdir -p ./release-assets
 
-          # 复制所有安装包和签名文件
+          # 复制所有安装包和签名文件（支持 Windows 路径）
           find ./artifacts -type f \( \
             -name "*.msi" -o \
             -name "*.msi.zip" -o \
@@ -202,6 +230,9 @@ jobs:
             -name "*.deb" -o \
             -name "*.sig" \
           \) -exec cp {} ./release-assets/ \;
+
+          echo "=== Files copied to release-assets ==="
+          ls -la ./release-assets/
 
           # 生成 latest.json（简化版本，不依赖签名文件）
           VERSION="${{ needs.version-info.outputs.version }}"
