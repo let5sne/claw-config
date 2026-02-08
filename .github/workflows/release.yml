@@ -97,6 +97,10 @@ jobs:
         if: matrix.target == 'aarch64-apple-darwin'
         run: rustup target add aarch64-apple-darwin
 
+      - name: Setup Rust target (x86_64-apple-darwin)
+        if: matrix.target == 'x86_64-apple-darwin'
+        run: rustup target add x86_64-apple-darwin
+
       - name: Build frontend
         run: npm run build
 
