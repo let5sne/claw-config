@@ -30,11 +30,10 @@ jobs:
             echo "is_prerelease=false" >> $GITHUB_OUTPUT
           fi
 
-  # 构建并发布
+  # 构建并发布 - 使用 Tauri 官方 Action
   build-and-release:
     name: Build (${{ matrix.target }})
     needs: version-info
-    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
@@ -42,35 +41,21 @@ jobs:
           # Linux
           - os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
-            args: '--target x86_64-unknown-linux-gnu'
+            args: --target x86_64-unknown-linux-gnu
 
           # Windows
           - os: windows-latest
             target: x86_64-pc-windows-msvc
-            args: ''
 
-          # macOS Apple Silicon (ARM64)
+          # macOS Apple Silicon
           - os: macos-latest
             target: aarch64-apple-darwin
-            args: '--target aarch64-apple-darwin'
+            args: --target aarch64-apple-darwin
 
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Setup Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: ${{ matrix.target }}
-
-      - name: Ensure Rust target is installed
-        run: rustup target add ${{ matrix.target }}
-
-      - name: Cache Rust dependencies
-        uses: swatinem/rust-cache@v2
-        with:
-          workspaces: './src-tauri -> target'
-          key: ${{ matrix.target }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -87,67 +72,23 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
 
-      - name: Build frontend
-        run: npm run build
-
       - name: Build Tauri app
-        shell: bash
-        run: |
-          if [ "$RUNNER_OS" = "Windows" ]; then
-            echo "Building Windows app..."
-            cargo tauri build --verbose
-          else
-            echo "Building ${{ matrix.target }} app..."
-            cargo tauri build ${{ matrix.args }} --verbose
-          fi
-        working-directory: ./src-tauri
+        uses: tauri-apps/tauri-action@v0
+        with:
+          tauri-script: build
+          args: ${{ matrix.args || '' }}
         env:
           TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
           TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
 
-      - name: List build outputs
-        shell: bash
-        run: |
-          echo "=== Target release directory ==="
-          ls -la src-tauri/target/${{ matrix.target }}/release/ || true
-          echo ""
-          echo "=== Bundle directory ==="
-          ls -la src-tauri/target/${{ matrix.target }}/release/bundle/ || true
-          echo ""
-          echo "=== All files in release tree ==="
-          find src-tauri/target/${{ matrix.target }}/release -type f || true
-          echo ""
-          echo "=== All MSI/EXE files ==="
-          find src-tauri/target/${{ matrix.target }} -type f \( -name "*.msi" -o -name "*.exe" -o -name "*.msi.zip" \) || true
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: claw-config-${{ matrix.target }}
-          path: src-tauri/target/${{ matrix.target }}/release/bundle/
-          if-no-files-found: warn
-
-  # 创建 GitHub Release (universal macOS)
-  create-universal-macos:
-    name: Create Universal macOS Bundle
+  # 构建 Universal macOS
+  build-universal:
+    name: Build Universal macOS
     needs: version-info
     runs-on: macos-latest
-    permissions:
-      contents: write
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Setup Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: aarch64-apple-darwin,x86_64-apple-darwin
-
-      - name: Ensure universal build targets are installed
-        run: |
-          rustup target add aarch64-apple-darwin
-          rustup target add x86_64-apple-darwin
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -158,31 +99,19 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build frontend
-        run: npm run build
-
-      - name: Build universal macOS binary
-        run: npm run tauri:build -- --target universal-apple-darwin
+      - name: Build Tauri app (Universal)
+        uses: tauri-apps/tauri-action@v0
+        with:
+          tauri-script: build
+          args: --target universal-apple-darwin
         env:
           TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
           TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
 
-      - name: List universal build outputs
-        run: |
-          echo "=== Universal build output directory ==="
-          ls -R src-tauri/target/universal-apple-darwin/release/bundle/ || true
-
-      - name: Upload universal macOS artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: claw-config-universal-apple-darwin
-          path: src-tauri/target/universal-apple-darwin/release/bundle/
-          if-no-files-found: error
-
   # 创建 GitHub Release
   create-release:
     name: Create GitHub Release
-    needs: [version-info, build-and-release, create-universal-macos]
+    needs: [version-info, build-and-release, build-universal]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -190,88 +119,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Install dependencies
-        run: sudo apt-get update && sudo apt-get install -y jq
-
-      - name: Download all artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: ./artifacts
-
-      - name: List downloaded artifacts
-        run: |
-          echo "=== Artifacts directory structure ==="
-          ls -R ./artifacts/ || echo "No artifacts directory found"
-          echo ""
-          echo "=== All downloaded files ==="
-          find ./artifacts -type f || echo "No files found"
-          echo ""
-          echo "=== Files by extension ==="
-          find ./artifacts -type f \( -name "*.msi" -o -name "*.msi.zip" -o -name "*.app.tar.gz" -o -name "*.dmg" -o -name "*.AppImage" -o -name "*.deb" \) || echo "No package files found"
-
-      - name: Prepare release assets
-        run: |
-          mkdir -p ./release-assets
-
-          # 检查 artifacts 目录是否存在
-          if [ ! -d "./artifacts" ]; then
-            echo "ERROR: artifacts directory not found!"
-            exit 1
-          fi
-
-          # 复制所有安装包和签名文件（支持 Windows 路径）
-          find ./artifacts -type f \( \
-            -name "*.msi" -o \
-            -name "*.msi.zip" -o \
-            -name "*.app.tar.gz" -o \
-            -name "*.dmg" -o \
-            -name "*.AppImage" -o \
-            -name "*.AppImage.tar.gz" -o \
-            -name "*.deb" -o \
-            -name "*.sig" \
-          \) -exec cp {} ./release-assets/ \;
-
-          echo "=== Files copied to release-assets ==="
-          ls -la ./release-assets/
-
-          # 检查是否有文件被复制
-          if [ -z "$(ls -A ./release-assets)" ]; then
-            echo "ERROR: No files were copied to release-assets!"
-            find ./artifacts -type f || true
-            exit 1
-          fi
-
-          # 生成 latest.json（简化版本，不依赖签名文件）
-          VERSION="${{ needs.version-info.outputs.version }}"
-          VERSION_NO_V="${VERSION#v}"
-          PUB_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-
-          cat > ./release-assets/latest.json << EOF
-          {
-            "version": "${VERSION_NO_V}",
-            "notes": "https://github.com/let5sne/claw-config/releases/tag/${VERSION}",
-            "pub_date": "${PUB_DATE}",
-            "platforms": {
-              "windows-x86_64": {
-                "signature": "",
-                "url": "https://github.com/let5sne/claw-config/releases/download/${VERSION}/claw-config_${VERSION_NO_V}_x64_en-US.msi.zip"
-              },
-              "darwin-aarch64": {
-                "signature": "",
-                "url": "https://github.com/let5sne/claw-config/releases/download/${VERSION}/claw-config_${VERSION_NO_V}_aarch64.app.tar.gz"
-              },
-              "darwin-universal": {
-                "signature": "",
-                "url": "https://github.com/let5sne/claw-config/releases/download/${VERSION}/claw-config_${VERSION_NO_V}_universal.app.tar.gz"
-              },
-              "linux-x86_64": {
-                "signature": "",
-                "url": "https://github.com/let5sne/claw-config/releases/download/${VERSION}/claw-config_${VERSION_NO_V}_amd64.AppImage.tar.gz"
-              }
-            }
-          }
-          EOF
 
       - name: Generate release notes
         id: release_notes
@@ -309,7 +156,6 @@ jobs:
           body_path: release_notes.md
           draft: false
           prerelease: ${{ needs.version-info.outputs.is_prerelease == 'true' }}
-          files: ./release-assets/*
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
