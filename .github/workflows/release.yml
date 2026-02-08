@@ -51,13 +51,7 @@ jobs:
             artifacts: '*.msi.zip'
             args: ''
 
-          # macOS Intel (use Intel runner for x86_64 builds)
-          - os: macos-13
-            target: x86_64-apple-darwin
-            artifacts: '*.app.tar.gz *.dmg'
-            args: '--target x86_64-apple-darwin'
-
-          # macOS Apple Silicon
+          # macOS Apple Silicon (ARM64)
           - os: macos-latest
             target: aarch64-apple-darwin
             artifacts: '*.app.tar.gz *.dmg'
@@ -224,10 +218,6 @@ jobs:
                 "signature": "",
                 "url": "https://github.com/let5sne/claw-config/releases/download/${VERSION}/claw-config_${VERSION_NO_V}_x64_en-US.msi.zip"
               },
-              "darwin-x86_64": {
-                "signature": "",
-                "url": "https://github.com/let5sne/claw-config/releases/download/${VERSION}/claw-config_${VERSION_NO_V}_x64.app.tar.gz"
-              },
               "darwin-aarch64": {
                 "signature": "",
                 "url": "https://github.com/let5sne/claw-config/releases/download/${VERSION}/claw-config_${VERSION_NO_V}_aarch64.app.tar.gz"
@@ -257,9 +247,8 @@ jobs:
           - \`claw-config_${VERSION}_x64_en-US.msi\` - Windows 安装程序
 
           **macOS**:
-          - \`claw-config_${VERSION}_x64.dmg\` - Intel Mac 安装程序
           - \`claw-config_${VERSION}_aarch64.dmg\` - Apple Silicon Mac 安装程序
-          - \`claw-config_${VERSION}_universal.dmg\` - Universal Mac 安装程序
+          - \`claw-config_${VERSION}_universal.dmg\` - Universal Mac 安装程序（兼容 Intel + Apple Silicon）
 
           **Linux**:
           - \`claw-config_${VERSION}_amd64.AppImage\` - 通用 Linux 可执行文件
