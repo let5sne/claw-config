@@ -72,6 +72,9 @@ jobs:
         with:
           targets: ${{ matrix.target }}
 
+      - name: Ensure Rust target is installed
+        run: rustup target add ${{ matrix.target }}
+
       - name: Cache Rust dependencies
         uses: swatinem/rust-cache@v2
         with:
@@ -134,6 +137,13 @@ jobs:
 
       - name: Setup Rust toolchain
         uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-darwin,x86_64-apple-darwin
+
+      - name: Ensure universal build targets are installed
+        run: |
+          rustup target add aarch64-apple-darwin
+          rustup target add x86_64-apple-darwin
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
