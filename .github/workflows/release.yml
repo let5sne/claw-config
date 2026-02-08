@@ -93,13 +93,17 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
 
-      - name: Setup Rust target (aarch64-apple-darwin)
-        if: matrix.target == 'aarch64-apple-darwin'
-        run: rustup target add aarch64-apple-darwin
-
-      - name: Setup Rust target (x86_64-apple-darwin)
-        if: matrix.target == 'x86_64-apple-darwin'
-        run: rustup target add x86_64-apple-darwin
+      - name: Setup Rust targets (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          # GitHub Actions macOS runners are now ARM64 by default
+          # Always install native target (host) and explicitly add the build target
+          rustup target add aarch64-apple-darwin
+          if [ "${{ matrix.target }}" = "x86_64-apple-darwin" ]; then
+            rustup target add x86_64-apple-darwin
+          fi
+          # Verify targets are installed
+          rustup target list --installed
 
       - name: Build frontend
         run: npm run build
