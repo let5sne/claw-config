@@ -165,11 +165,13 @@ jobs:
           sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
 
       - name: Setup Rust target (macOS)
-        if: runner.os == 'macOS'
+        if: matrix.os == 'macos-latest'
         run: |
           # GitHub Actions macOS runners are now ARM64 by default
           # Install x86_64 target for cross-compilation
+          echo "Adding x86_64-apple-darwin target for cross-compilation..."
           rustup target add x86_64-apple-darwin
+          echo "Installed targets:"
           rustup target list --installed
 
       - name: Build app
