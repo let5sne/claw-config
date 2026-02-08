@@ -1,5 +1,5 @@
 use crate::error::AppError;
-use crate::models::{OpenClawConfig, Provider, AgentsDefaults, ModelConfig, SubagentsConfig};
+use crate::models::{AgentsDefaults, ModelConfig, OpenClawConfig, Provider, SubagentsConfig};
 use crate::service::ConfigService;
 use std::collections::HashMap;
 use std::sync::Mutex;
@@ -11,37 +11,33 @@ pub struct AppState {
 
 // 获取完整配置
 #[tauri::command]
-pub fn get_config(
-    state: State<'_, AppState>,
-) -> Result<OpenClawConfig, AppError> {
-    let service = state.config_service.lock()
+pub fn get_config(state: State<'_, AppState>) -> Result<OpenClawConfig, AppError> {
+    let service = state
+        .config_service
+        .lock()
         .map_err(|_| AppError::Io("Failed to lock config service".to_string()))?;
     service.read_config()
 }
 
 // 保存完整配置
 #[tauri::command]
-pub fn save_config(
-    state: State<'_, AppState>,
-    config: OpenClawConfig,
-) -> Result<(), AppError> {
-    let service = state.config_service.lock()
+pub fn save_config(state: State<'_, AppState>, config: OpenClawConfig) -> Result<(), AppError> {
+    let service = state
+        .config_service
+        .lock()
         .map_err(|_| AppError::Io("Failed to lock config service".to_string()))?;
     service.write_config(&config)
 }
 
 // 获取 Providers
 #[tauri::command]
-pub fn get_providers(
-    state: State<'_, AppState>,
-) -> Result<HashMap<String, Provider>, AppError> {
-    let service = state.config_service.lock()
+pub fn get_providers(state: State<'_, AppState>) -> Result<HashMap<String, Provider>, AppError> {
+    let service = state
+        .config_service
+        .lock()
         .map_err(|_| AppError::Io("Failed to lock config service".to_string()))?;
     let config = service.read_config()?;
-    Ok(config
-        .models
-        .map(|m| m.providers)
-        .unwrap_or_default())
+    Ok(config.models.map(|m| m.providers).unwrap_or_default())
 }
 
 // 添加 Provider
@@ -51,7 +47,9 @@ pub fn add_provider(
     id: String,
     provider: Provider,
 ) -> Result<(), AppError> {
-    let service = state.config_service.lock()
+    let service = state
+        .config_service
+        .lock()
         .map_err(|_| AppError::Io("Failed to lock config service".to_string()))?;
     let mut config = service.read_config()?;
 
@@ -75,13 +73,18 @@ pub fn update_provider(
     id: String,
     provider: Provider,
 ) -> Result<(), AppError> {
-    let service = state.config_service.lock()
+    let service = state
+        .config_service
+        .lock()
         .map_err(|_| AppError::Io("Failed to lock config service".to_string()))?;
     let mut config = service.read_config()?;
 
     if let Some(ref mut models) = config.models {
         if !models.providers.contains_key(&id) {
-            return Err(AppError::InvalidProvider(format!("Provider '{}' not found", id)));
+            return Err(AppError::InvalidProvider(format!(
+                "Provider '{}' not found",
+                id
+            )));
         }
         models.providers.insert(id, provider);
         service.write_config(&config)?;
@@ -92,11 +95,10 @@ pub fn update_provider(
 
 // 删除 Provider
 #[tauri::command]
-pub fn delete_provider(
-    state: State<'_, AppState>,
-    id: String,
-) -> Result<(), AppError> {
-    let service = state.config_service.lock()
+pub fn delete_provider(state: State<'_, AppState>, id: String) -> Result<(), AppError> {
+    let service = state
+        .config_service
+        .lock()
         .map_err(|_| AppError::Io("Failed to lock config service".to_string()))?;
     let mut config = service.read_config()?;
 
@@ -110,10 +112,10 @@ pub fn delete_provider(
 
 // 获取 Agents Defaults
 #[tauri::command]
-pub fn get_agents_defaults(
-    state: State<'_, AppState>,
-) -> Result<Option<AgentsDefaults>, AppError> {
-    let service = state.config_service.lock()
+pub fn get_agents_defaults(state: State<'_, AppState>) -> Result<Option<AgentsDefaults>, AppError> {
+    let service = state
+        .config_service
+        .lock()
         .map_err(|_| AppError::Io("Failed to lock config service".to_string()))?;
     let config = service.read_config()?;
     Ok(config.agents.map(|a| a.defaults))
@@ -125,7 +127,9 @@ pub fn save_agents_defaults(
     state: State<'_, AppState>,
     defaults: AgentsDefaults,
 ) -> Result<(), AppError> {
-    let service = state.config_service.lock()
+    let service = state
+        .config_service
+        .lock()
         .map_err(|_| AppError::Io("Failed to lock config service".to_string()))?;
     let mut config = service.read_config()?;
 
@@ -144,10 +148,10 @@ pub fn save_agents_defaults(
 
 // 备份配置
 #[tauri::command]
-pub fn backup_config(
-    state: State<'_, AppState>,
-) -> Result<String, AppError> {
-    let service = state.config_service.lock()
+pub fn backup_config(state: State<'_, AppState>) -> Result<String, AppError> {
+    let service = state
+        .config_service
+        .lock()
         .map_err(|_| AppError::Io("Failed to lock config service".to_string()))?;
     let backup_path = service.backup_config()?;
     Ok(backup_path.to_string_lossy().to_string())
@@ -155,11 +159,10 @@ pub fn backup_config(
 
 // 恢复配置
 #[tauri::command]
-pub fn restore_config(
-    state: State<'_, AppState>,
-    backup_path: String,
-) -> Result<(), AppError> {
-    let service = state.config_service.lock()
+pub fn restore_config(state: State<'_, AppState>, backup_path: String) -> Result<(), AppError> {
+    let service = state
+        .config_service
+        .lock()
         .map_err(|_| AppError::Io("Failed to lock config service".to_string()))?;
     let path = backup_path.into();
     service.restore_config(&path)
@@ -167,20 +170,20 @@ pub fn restore_config(
 
 // 获取配置文件路径
 #[tauri::command]
-pub fn get_config_path(
-    state: State<'_, AppState>,
-) -> Result<String, AppError> {
-    let service = state.config_service.lock()
+pub fn get_config_path(state: State<'_, AppState>) -> Result<String, AppError> {
+    let service = state
+        .config_service
+        .lock()
         .map_err(|_| AppError::Io("Failed to lock config service".to_string()))?;
     Ok(service.get_config_path().to_string_lossy().to_string())
 }
 
 // 检查配置文件是否存在
 #[tauri::command]
-pub fn config_exists(
-    state: State<'_, AppState>,
-) -> Result<bool, AppError> {
-    let service = state.config_service.lock()
+pub fn config_exists(state: State<'_, AppState>) -> Result<bool, AppError> {
+    let service = state
+        .config_service
+        .lock()
         .map_err(|_| AppError::Io("Failed to lock config service".to_string()))?;
     Ok(service.get_config_path().exists())
 }
@@ -197,9 +200,7 @@ fn default_agents_defaults() -> AgentsDefaults {
         models: HashMap::new(),
         workspace: None,
         maxConcurrent: Some(6),
-        subagents: Some(SubagentsConfig {
-            max_concurrent: 12,
-        }),
+        subagents: Some(SubagentsConfig { max_concurrent: 12 }),
         caching: None,
         timeout: None,
         retry: None,

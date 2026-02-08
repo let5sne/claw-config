@@ -1,8 +1,8 @@
-use crate::models::OpenClawConfig;
 use crate::error::AppError;
+use crate::models::OpenClawConfig;
+use dirs::home_dir;
 use std::fs;
 use std::path::PathBuf;
-use dirs::home_dir;
 
 #[derive(Debug, Clone)]
 pub struct ConfigService {
@@ -31,15 +31,13 @@ impl ConfigService {
         let content = fs::read_to_string(&self.config_path)
             .map_err(|e| AppError::ReadError(e.to_string()))?;
 
-        serde_json::from_str(&content)
-            .map_err(|e| AppError::ParseError(e.to_string()))
+        serde_json::from_str(&content).map_err(|e| AppError::ParseError(e.to_string()))
     }
 
     pub fn write_config(&self, config: &OpenClawConfig) -> Result<(), AppError> {
         // 确保目录存在
         if let Some(parent) = self.config_path.parent() {
-            fs::create_dir_all(parent)
-                .map_err(|e| AppError::WriteError(e.to_string()))?;
+            fs::create_dir_all(parent).map_err(|e| AppError::WriteError(e.to_string()))?;
         }
 
         // 读取现有配置以保留未修改的部分
@@ -55,8 +53,7 @@ impl ConfigService {
         let content = serde_json::to_string_pretty(&merged_config)
             .map_err(|e| AppError::SerializeError(e.to_string()))?;
 
-        fs::write(&self.config_path, content)
-            .map_err(|e| AppError::WriteError(e.to_string()))?;
+        fs::write(&self.config_path, content).map_err(|e| AppError::WriteError(e.to_string()))?;
 
         Ok(())
     }
@@ -80,12 +77,9 @@ impl ConfigService {
             return Err(AppError::ConfigNotFound);
         }
 
-        let backup_dir = self.config_path.parent()
-            .unwrap()
-            .join("backups");
+        let backup_dir = self.config_path.parent().unwrap().join("backups");
 
-        fs::create_dir_all(&backup_dir)
-            .map_err(|e| AppError::WriteError(e.to_string()))?;
+        fs::create_dir_all(&backup_dir).map_err(|e| AppError::WriteError(e.to_string()))?;
 
         let timestamp = chrono::Utc::now().format("%Y%m%d_%H%M%S");
         let backup_path = backup_dir.join(format!("openclaw_backup_{}.json", timestamp));

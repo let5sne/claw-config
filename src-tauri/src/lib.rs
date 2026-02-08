@@ -1,7 +1,7 @@
+mod commands;
+mod error;
 mod models;
 mod service;
-mod error;
-mod commands;
 
 use commands::*;
 use service::ConfigService;
@@ -13,8 +13,7 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .setup(|app| {
-            let config_service = ConfigService::new()
-                .expect("Failed to create config service");
+            let config_service = ConfigService::new().expect("Failed to create config service");
 
             app.manage(commands::AppState {
                 config_service: Mutex::new(config_service),
