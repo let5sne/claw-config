@@ -1,0 +1,97 @@
+{
+  "app": {
+    "title": "OpenClaw Switch",
+    "description": "OpenClaw 設定管理ツール"
+  },
+  "common": {
+    "loading": "読み込み中...",
+    "save": "保存",
+    "cancel": "キャンセル",
+    "edit": "編集",
+    "delete": "削除",
+    "add": "追加",
+    "retry": "再試行",
+    "confirm": "確認",
+    "close": "閉じる",
+    "saveInProgress": "保存中...",
+    "addInProgress": "追加中...",
+    "deleteInProgress": "削除中...",
+    "updateInProgress": "更新中...",
+    "none": "なし",
+    "noSet": "未設定",
+    "enabled": "有効",
+    "disabled": "無効"
+  },
+  "nav": {
+    "providers": "プロバイダー",
+    "agents": "Agents 設定",
+    "providersCount": "プロバイダー ({{count}})"
+  },
+  "providers": {
+    "title": "プロバイダー",
+    "description": "モデルプロバイダーの設定を管理",
+    "addProvider": "プロバイダーを追加",
+    "addFirstProvider": "最初のプロバイダーを追加",
+    "noProviders": "まだプロバイダーが設定されていません",
+    "deleteConfirm": "プロバイダー \"{{id}}\" を削除してもよろしいですか？",
+    "deleteFailed": "削除に失敗しました: {{error}}",
+    "addFailed": "追加に失敗しました: {{error}}",
+    "updateFailed": "更新に失敗しました: {{error}}",
+    "loadFailed": "設定の読み込みに失敗しました",
+    "modelList": "モデルリスト ({{count}})",
+    "noModels": "モデルなし",
+    "apiKeyConfigured": "設定済み",
+    "apiKeyMissing": "なし"
+  },
+  "addProviderModal": {
+    "title": "プロバイダーを追加",
+    "providerType": "プロバイダータイプ",
+    "selectProvider": "プロバイダーを選択...",
+    "configId": "設定 ID",
+    "customId": "カスタム ID",
+    "apiKey": "API キー",
+    "baseUrl": "ベース URL",
+    "add": "追加"
+  },
+  "editProviderModal": {
+    "title": "プロバイダーを編集",
+    "providerId": "プロバイダー ID",
+    "baseUrl": "ベース URL",
+    "apiKey": "API キー（空欄のまま変更なし）",
+    "apiKeyPlaceholder": "変更しない場合は空欄のままにしてください",
+    "save": "保存"
+  },
+  "agents": {
+    "title": "Agents デフォルト設定",
+    "description": "OpenClaw Agents のデフォルトの動作を設定",
+    "editConfig": "設定を編集",
+    "modelConfig": "モデル設定",
+    "modelConfigDescription": "さまざまなシナリオで使用するデフォルトモデルを選択",
+    "primaryModel": "プライマリモデル (primary)",
+    "fastModel": "高速モデル (fast)",
+    "balancedModel": "バランスモデル (balanced)",
+    "powerfulModel": "高機能モデル (powerful)",
+    "selectModel": "モデルを選択...",
+    "notSet": "未設定",
+    "performanceSettings": "パフォーマンス設定",
+    "performanceSettingsDescription": "並行性とパフォーマンスパラメータを設定",
+    "maxConcurrent": "最大並行数",
+    "subagentMaxConcurrent": "サブエージェント最大並行数",
+    "advancedSettings": "詳細設定",
+    "caching": "キャッシュ",
+    "cacheSize": "キャッシュサイズ",
+    "requestTimeout": "リクエストタイムアウト",
+    "idleTimeout": "アイドルタイムアウト",
+    "maxRetries": "最大再試行回数",
+    "workspace": "ワークスペース",
+    "saveConfiguration": "設定を保存",
+    "saveInProgress": "保存中..."
+  },
+  "languageSelector": {
+    "title": "言語",
+    "en": "English",
+    "zh": "中文",
+    "ja": "日本語",
+    "ko": "한국어"
+  }
+}

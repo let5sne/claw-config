@@ -1,0 +1,97 @@
+{
+  "app": {
+    "title": "OpenClaw Switch",
+    "description": "OpenClaw Configuration Management Tool"
+  },
+  "common": {
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "add": "Add",
+    "retry": "Retry",
+    "confirm": "Confirm",
+    "close": "Close",
+    "saveInProgress": "Saving...",
+    "addInProgress": "Adding...",
+    "deleteInProgress": "Deleting...",
+    "updateInProgress": "Updating...",
+    "none": "None",
+    "noSet": "Not Set",
+    "enabled": "Enabled",
+    "disabled": "Disabled"
+  },
+  "nav": {
+    "providers": "Providers",
+    "agents": "Agents Config",
+    "providersCount": "Providers ({{count}})"
+  },
+  "providers": {
+    "title": "Providers",
+    "description": "Manage your model provider configurations",
+    "addProvider": "Add Provider",
+    "addFirstProvider": "Add First Provider",
+    "noProviders": "No providers configured yet",
+    "deleteConfirm": "Are you sure you want to delete provider \"{{id}}\"?",
+    "deleteFailed": "Delete failed: {{error}}",
+    "addFailed": "Add failed: {{error}}",
+    "updateFailed": "Update failed: {{error}}",
+    "loadFailed": "Failed to load configuration",
+    "modelList": "Model List ({{count}})",
+    "noModels": "No models",
+    "apiKeyConfigured": "Configured",
+    "apiKeyMissing": "None"
+  },
+  "addProviderModal": {
+    "title": "Add Provider",
+    "providerType": "Provider Type",
+    "selectProvider": "Select Provider...",
+    "configId": "Config ID",
+    "customId": "Custom ID",
+    "apiKey": "API Key",
+    "baseUrl": "Base URL",
+    "add": "Add"
+  },
+  "editProviderModal": {
+    "title": "Edit Provider",
+    "providerId": "Provider ID",
+    "baseUrl": "Base URL",
+    "apiKey": "API Key (leave empty to keep unchanged)",
+    "apiKeyPlaceholder": "Leave empty to keep unchanged",
+    "save": "Save"
+  },
+  "agents": {
+    "title": "Agents Default Configuration",
+    "description": "Configure OpenClaw Agents default behavior",
+    "editConfig": "Edit Configuration",
+    "modelConfig": "Model Configuration",
+    "modelConfigDescription": "Select default models for different scenarios",
+    "primaryModel": "Primary Model (primary)",
+    "fastModel": "Fast Model (fast)",
+    "balancedModel": "Balanced Model (balanced)",
+    "powerfulModel": "Powerful Model (powerful)",
+    "selectModel": "Select Model...",
+    "notSet": "Not Set",
+    "performanceSettings": "Performance Settings",
+    "performanceSettingsDescription": "Configure concurrency and performance parameters",
+    "maxConcurrent": "Max Concurrent",
+    "subagentMaxConcurrent": "Subagent Max Concurrent",
+    "advancedSettings": "Advanced Settings",
+    "caching": "Caching",
+    "cacheSize": "Cache Size",
+    "requestTimeout": "Request Timeout",
+    "idleTimeout": "Idle Timeout",
+    "maxRetries": "Max Retries",
+    "workspace": "Workspace",
+    "saveConfiguration": "Save Configuration",
+    "saveInProgress": "Saving..."
+  },
+  "languageSelector": {
+    "title": "Language",
+    "en": "English",
+    "zh": "中文",
+    "ja": "日本語",
+    "ko": "한국어"
+  }
+}

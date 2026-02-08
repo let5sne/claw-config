@@ -6,8 +6,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Select } from '../ui/select';
+import { useTranslation } from 'react-i18next';
 
 export function AgentsConfigPanel() {
+  const { t } = useTranslation();
   const { agents, isLoading, saveDefaults, isSaving } = useAgentsDefaults();
   const { providers } = useProviders();
 
@@ -73,7 +75,7 @@ export function AgentsConfigPanel() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="text-muted-foreground">加载中...</div>
+        <div className="text-muted-foreground">{t('common.loading')}</div>
       </div>
     );
   }
@@ -83,29 +85,29 @@ export function AgentsConfigPanel() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold">Agents 配置</h2>
+        <h2 className="text-2xl font-bold">{t('agents.title')}</h2>
         <p className="text-sm text-muted-foreground mt-1">
-          配置 OpenClaw Agents 的默认行为
+          {t('agents.description')}
         </p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>模型设置</CardTitle>
+          <CardTitle>{t('agents.modelConfig')}</CardTitle>
           <CardDescription>
-            选择不同场景下使用的默认模型
+            {t('agents.modelConfigDescription')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <Label htmlFor="primary">主模型 (primary)</Label>
+            <Label htmlFor="primary">{t('agents.primaryModel')}</Label>
             <Select
               id="primary"
               value={formData.primary}
               onChange={(e) => setFormData({ ...formData, primary: e.target.value })}
               required
             >
-              <option value="">选择模型...</option>
+              <option value="">{t('agents.selectModel')}</option>
               {availableModels.map(model => (
                 <option key={model.id} value={model.id}>
                   {model.name}
@@ -115,13 +117,13 @@ export function AgentsConfigPanel() {
           </div>
 
           <div>
-            <Label htmlFor="fast">快速模型 (fast)</Label>
+            <Label htmlFor="fast">{t('agents.fastModel')}</Label>
             <Select
               id="fast"
               value={formData.fast}
               onChange={(e) => setFormData({ ...formData, fast: e.target.value })}
             >
-              <option value="">不设置</option>
+              <option value="">{t('agents.notSet')}</option>
               {availableModels.map(model => (
                 <option key={model.id} value={model.id}>
                   {model.name}
@@ -131,13 +133,13 @@ export function AgentsConfigPanel() {
           </div>
 
           <div>
-            <Label htmlFor="balanced">均衡模型 (balanced)</Label>
+            <Label htmlFor="balanced">{t('agents.balancedModel')}</Label>
             <Select
               id="balanced"
               value={formData.balanced}
               onChange={(e) => setFormData({ ...formData, balanced: e.target.value })}
             >
-              <option value="">不设置</option>
+              <option value="">{t('agents.notSet')}</option>
               {availableModels.map(model => (
                 <option key={model.id} value={model.id}>
                   {model.name}
@@ -147,13 +149,13 @@ export function AgentsConfigPanel() {
           </div>
 
           <div>
-            <Label htmlFor="powerful">强力模型 (powerful)</Label>
+            <Label htmlFor="powerful">{t('agents.powerfulModel')}</Label>
             <Select
               id="powerful"
               value={formData.powerful}
               onChange={(e) => setFormData({ ...formData, powerful: e.target.value })}
             >
-              <option value="">不设置</option>
+              <option value="">{t('agents.notSet')}</option>
               {availableModels.map(model => (
                 <option key={model.id} value={model.id}>
                   {model.name}
@@ -166,15 +168,15 @@ export function AgentsConfigPanel() {
 
       <Card>
         <CardHeader>
-          <CardTitle>性能设置</CardTitle>
+          <CardTitle>{t('agents.performanceSettings')}</CardTitle>
           <CardDescription>
-            配置并发和性能相关参数
+            {t('agents.performanceSettingsDescription')}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="maxConcurrent">最大并发数</Label>
+              <Label htmlFor="maxConcurrent">{t('agents.maxConcurrent')}</Label>
               <Input
                 id="maxConcurrent"
                 type="number"
@@ -186,7 +188,7 @@ export function AgentsConfigPanel() {
             </div>
 
             <div>
-              <Label htmlFor="subagentMaxConcurrent">子代理最大并发数</Label>
+              <Label htmlFor="subagentMaxConcurrent">{t('agents.subagentMaxConcurrent')}</Label>
               <Input
                 id="subagentMaxConcurrent"
                 type="number"
@@ -202,7 +204,7 @@ export function AgentsConfigPanel() {
 
       <div className="flex justify-end">
         <Button onClick={handleSave} disabled={isSaving}>
-          {isSaving ? '保存中...' : '保存配置'}
+          {isSaving ? t('agents.saveInProgress') : t('agents.saveConfiguration')}
         </Button>
       </div>
     </div>

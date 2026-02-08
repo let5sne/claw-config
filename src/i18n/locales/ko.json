@@ -1,0 +1,97 @@
+{
+  "app": {
+    "title": "OpenClaw Switch",
+    "description": "OpenClaw 구성 관리 도구"
+  },
+  "common": {
+    "loading": "로딩 중...",
+    "save": "저장",
+    "cancel": "취소",
+    "edit": "편집",
+    "delete": "삭제",
+    "add": "추가",
+    "retry": "재시도",
+    "confirm": "확인",
+    "close": "닫기",
+    "saveInProgress": "저장 중...",
+    "addInProgress": "추가 중...",
+    "deleteInProgress": "삭제 중...",
+    "updateInProgress": "업데이트 중...",
+    "none": "없음",
+    "noSet": "설정 안 함",
+    "enabled": "사용",
+    "disabled": "사용 안 함"
+  },
+  "nav": {
+    "providers": "공급자",
+    "agents": "Agents 구성",
+    "providersCount": "공급자 ({{count}})"
+  },
+  "providers": {
+    "title": "공급자",
+    "description": "모델 공급자 구성을 관리하세요",
+    "addProvider": "공급자 추가",
+    "addFirstProvider": "첫 번째 공급자 추가",
+    "noProviders": "아직 구성된 공급자가 없습니다",
+    "deleteConfirm": "공급자 \"{{id}}\"을(를) 삭제하시겠습니까?",
+    "deleteFailed": "삭제 실패: {{error}}",
+    "addFailed": "추가 실패: {{error}}",
+    "updateFailed": "업데이트 실패: {{error}}",
+    "loadFailed": "구성을 로드하지 못했습니다",
+    "modelList": "모델 목록 ({{count}})",
+    "noModels": "모델 없음",
+    "apiKeyConfigured": "구성됨",
+    "apiKeyMissing": "없음"
+  },
+  "addProviderModal": {
+    "title": "공급자 추가",
+    "providerType": "공급자 유형",
+    "selectProvider": "공급자 선택...",
+    "configId": "구성 ID",
+    "customId": "사용자 지정 ID",
+    "apiKey": "API 키",
+    "baseUrl": "기본 URL",
+    "add": "추가"
+  },
+  "editProviderModal": {
+    "title": "공급자 편집",
+    "providerId": "공급자 ID",
+    "baseUrl": "기본 URL",
+    "apiKey": "API 키(변경하지 않으려면 비워 두세요)",
+    "apiKeyPlaceholder": "변경하지 않으려면 비워 두세요",
+    "save": "저장"
+  },
+  "agents": {
+    "title": "Agents 기본 구성",
+    "description": "OpenClaw Agents의 기본 동작을 구성하세요",
+    "editConfig": "구성 편집",
+    "modelConfig": "모델 구성",
+    "modelConfigDescription": "다양한 시나리오에서 사용할 기본 모델을 선택하세요",
+    "primaryModel": "기본 모델 (primary)",
+    "fastModel": "빠른 모델 (fast)",
+    "balancedModel": "균형 모델 (balanced)",
+    "powerfulModel": "강력한 모델 (powerful)",
+    "selectModel": "모델 선택...",
+    "notSet": "설정 안 함",
+    "performanceSettings": "성능 설정",
+    "performanceSettingsDescription": "동시성 및 성능 매개변수 구성",
+    "maxConcurrent": "최대 동시성",
+    "subagentMaxConcurrent": "하위 에이전트 최대 동시성",
+    "advancedSettings": "고급 설정",
+    "caching": "캐싱",
+    "cacheSize": "캐시 크기",
+    "requestTimeout": "요청 제한 시간",
+    "idleTimeout": "유휴 제한 시간",
+    "maxRetries": "최대 재시도 횟수",
+    "workspace": "작업 공간",
+    "saveConfiguration": "구성 저장",
+    "saveInProgress": "저장 중..."
+  },
+  "languageSelector": {
+    "title": "언어",
+    "en": "English",
+    "zh": "中文",
+    "ja": "日本語",
+    "ko": "한국어"
+  }
+}

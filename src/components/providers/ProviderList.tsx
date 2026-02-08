@@ -1,8 +1,10 @@
 import { useProviders } from '../../hooks/useProviders';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
+import { useTranslation } from 'react-i18next';
 
 export function ProviderList() {
+  const { t } = useTranslation();
   const { providers, isLoading, error, refetch } = useProviders();
 
   console.log('ProviderList render:', { providers, isLoading, error });
@@ -10,7 +12,7 @@ export function ProviderList() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="text-muted-foreground">加载中...</div>
+        <div className="text-muted-foreground">{t('common.loading')}</div>
       </div>
     );
   }
@@ -19,9 +21,9 @@ export function ProviderList() {
     return (
       <Card>
         <CardContent className="flex flex-col items-center justify-center py-12">
-          <p className="text-red-500 mb-2">加载配置失败</p>
+          <p className="text-red-500 mb-2">{t('providers.loadFailed')}</p>
           <p className="text-sm text-muted-foreground mb-4">{String(error)}</p>
-          <Button onClick={() => refetch()}>重试</Button>
+          <Button onClick={() => refetch()}>{t('common.retry')}</Button>
         </CardContent>
       </Card>
     );
@@ -34,21 +36,21 @@ export function ProviderList() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold">Providers</h2>
+          <h2 className="text-2xl font-bold">{t('providers.title')}</h2>
           <p className="text-sm text-muted-foreground mt-1">
-            管理你的模型提供商配置
+            {t('providers.description')}
           </p>
         </div>
         <Button>
-          添加 Provider
+          {t('providers.addProvider')}
         </Button>
       </div>
 
       {providerEntries.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
-            <p className="text-muted-foreground mb-4">还没有配置任何 Provider</p>
-            <Button>添加第一个 Provider</Button>
+            <p className="text-muted-foreground mb-4">{t('providers.noProviders')}</p>
+            <Button>{t('providers.addFirstProvider')}</Button>
           </CardContent>
         </Card>
       ) : (
@@ -65,17 +67,19 @@ export function ProviderList() {
                   </div>
                   <div className="flex gap-2">
                     <Button variant="outline" size="sm">
-                      编辑
+                      {t('common.edit')}
                     </Button>
                     <Button variant="destructive" size="sm">
-                      删除
+                      {t('common.delete')}
                     </Button>
                   </div>
                 </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  <div className="text-sm font-medium">模型列表 ({provider.models?.length || 0})</div>
+                  <div className="text-sm font-medium">
+                    {t('providers.modelList', { count: provider.models?.length || 0 })}
+                  </div>
                   <div className="flex flex-wrap gap-2">
                     {provider.models?.map((model) => (
                       <span
@@ -84,7 +88,7 @@ export function ProviderList() {
                       >
                         {model.name}
                       </span>
-                    )) || <span className="text-sm text-muted-foreground">无模型</span>}
+                    )) || <span className="text-sm text-muted-foreground">{t('providers.noModels')}</span>}
                   </div>
                 </div>
               </CardContent>

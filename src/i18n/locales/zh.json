@@ -1,0 +1,97 @@
+{
+  "app": {
+    "title": "OpenClaw Switch",
+    "description": "OpenClaw 配置管理工具"
+  },
+  "common": {
+    "loading": "加载中...",
+    "save": "保存",
+    "cancel": "取消",
+    "edit": "编辑",
+    "delete": "删除",
+    "add": "添加",
+    "retry": "重试",
+    "confirm": "确认",
+    "close": "关闭",
+    "saveInProgress": "保存中...",
+    "addInProgress": "添加中...",
+    "deleteInProgress": "删除中...",
+    "updateInProgress": "更新中...",
+    "none": "无",
+    "noSet": "不设置",
+    "enabled": "启用",
+    "disabled": "禁用"
+  },
+  "nav": {
+    "providers": "Providers",
+    "agents": "Agents 配置",
+    "providersCount": "Providers ({{count}})"
+  },
+  "providers": {
+    "title": "Providers",
+    "description": "管理你的模型提供商配置",
+    "addProvider": "添加 Provider",
+    "addFirstProvider": "添加第一个 Provider",
+    "noProviders": "还没有配置任何 Provider",
+    "deleteConfirm": "确定删除 Provider \"{{id}}\" 吗？",
+    "deleteFailed": "删除失败: {{error}}",
+    "addFailed": "添加失败: {{error}}",
+    "updateFailed": "更新失败: {{error}}",
+    "loadFailed": "加载配置失败",
+    "modelList": "模型列表 ({{count}})",
+    "noModels": "无模型",
+    "apiKeyConfigured": "已配置",
+    "apiKeyMissing": "无"
+  },
+  "addProviderModal": {
+    "title": "添加 Provider",
+    "providerType": "Provider 类型",
+    "selectProvider": "选择 Provider...",
+    "configId": "配置 ID",
+    "customId": "自定义 ID",
+    "apiKey": "API Key",
+    "baseUrl": "Base URL",
+    "add": "添加"
+  },
+  "editProviderModal": {
+    "title": "编辑 Provider",
+    "providerId": "Provider ID",
+    "baseUrl": "Base URL",
+    "apiKey": "API Key（留空保持不变）",
+    "apiKeyPlaceholder": "不修改请留空",
+    "save": "保存"
+  },
+  "agents": {
+    "title": "Agents 默认配置",
+    "description": "配置 OpenClaw Agents 的默认行为",
+    "editConfig": "编辑配置",
+    "modelConfig": "模型配置",
+    "modelConfigDescription": "选择不同场景下使用的默认模型",
+    "primaryModel": "主模型 (primary)",
+    "fastModel": "快速模型 (fast)",
+    "balancedModel": "均衡模型 (balanced)",
+    "powerfulModel": "强力模型 (powerful)",
+    "selectModel": "选择模型...",
+    "notSet": "不设置",
+    "performanceSettings": "性能设置",
+    "performanceSettingsDescription": "配置并发和性能相关参数",
+    "maxConcurrent": "最大并发数",
+    "subagentMaxConcurrent": "子代理最大并发数",
+    "advancedSettings": "高级设置",
+    "caching": "缓存",
+    "cacheSize": "缓存大小",
+    "requestTimeout": "请求超时",
+    "idleTimeout": "空闲超时",
+    "maxRetries": "最大重试次数",
+    "workspace": "工作空间",
+    "saveConfiguration": "保存配置",
+    "saveInProgress": "保存中..."
+  },
+  "languageSelector": {
+    "title": "语言",
+    "en": "English",
+    "zh": "中文",
+    "ja": "日本語",
+    "ko": "한국어"
+  }
+}
