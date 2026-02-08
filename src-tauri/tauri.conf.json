@@ -33,6 +33,15 @@
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "publisher": "大虾"
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDQwRTZENTM5QTI1RjY1QjUKUldSRTRJQlRJR0JLQkZRRUVCN0VOTVVUVjdJQzhMSU5VWlZTQ01aWUZGTjJPRFFISVpKRllHRkVWCmNPUVJEQlNCT0RBRFVGN0c0RjRDQ0VEQjJBQjNCN0UyRUVGNDZCRjM4NjNDQ0FCMDY5RjlBQjk0NkFFQTAK",
+      "endpoints": [
+        "https://github.com/let5sne/claw-config/releases/latest/download/latest.json"
+      ]
+    }
   }
 }

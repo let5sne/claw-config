@@ -1,0 +1,291 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  # 提取版本信息
+  version-info:
+    name: Extract Version Info
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get_version.outputs.version }}
+      is_prerelease: ${{ steps.check_prerelease.outputs.is_prerelease }}
+    steps:
+      - name: Get version from tag
+        id: get_version
+        run: echo "version=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Check if prerelease
+        id: check_prerelease
+        run: |
+          if [[ "${{ steps.get_version.outputs.version }}" =~ -(alpha|beta|rc|test|[0-9]+\.[0-9]+\.[0-9]+) ]]; then
+            echo "is_prerelease=true" >> $GITHUB_OUTPUT
+          else
+            echo "is_prerelease=false" >> $GITHUB_OUTPUT
+          fi
+
+  # 构建并发布
+  build-and-release:
+    name: Build (${{ matrix.target }})
+    needs: version-info
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Linux
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            artifacts: 'deb/appimage/bundle.deps/**'
+            args: '--target x86_64-unknown-linux-gnu'
+
+          # Windows
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            artifacts: '*.msi.zip'
+            args: '--target x86_64-pc-windows-msvc'
+
+          # macOS Intel
+          - os: macos-latest
+            target: x86_64-apple-darwin
+            artifacts: '*.app.tar.gz *.dmg'
+            args: '--target x86_64-apple-darwin'
+
+          # macOS Apple Silicon
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            artifacts: '*.app.tar.gz *.dmg'
+            args: '--target aarch64-apple-darwin'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Cache Rust dependencies
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: './src-tauri -> target'
+          key: ${{ matrix.target }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Install dependencies (Ubuntu)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+
+      - name: Setup Rust target (aarch64-apple-darwin)
+        if: matrix.target == 'aarch64-apple-darwin'
+        run: rustup target add aarch64-apple-darwin
+
+      - name: Build frontend
+        run: npm run build
+
+      - name: Build Tauri app
+        run: npm run tauri:build -- ${{ matrix.args }}
+        env:
+          TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+          TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: claw-config-${{ matrix.target }}
+          path: |
+            src-tauri/target/${{ matrix.target }}/release/bundle/*
+            !src-tauri/target/${{ matrix.target }}/release/bundle/**/*.dSYM/**
+            !src-tauri/target/${{ matrix.target }}/release/bundle/**/*.deb/**
+            !src-tauri/target/${{ matrix.target }}/release/bundle/**/debian/**
+          retention-days: 7
+          if-no-files-found: warn
+
+  # 创建 GitHub Release (universal macOS)
+  create-universal-macos:
+    name: Create Universal macOS Bundle
+    needs: version-info
+    runs-on: macos-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build frontend
+        run: npm run build
+
+      - name: Build universal macOS binary
+        run: npm run tauri:build -- --target universal-apple-darwin
+        env:
+          TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+          TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
+
+      - name: Upload universal macOS artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: claw-config-universal-apple-darwin
+          path: |
+            src-tauri/target/universal-apple-darwin/release/bundle/*.app.tar.gz
+            src-tauri/target/universal-apple-darwin/release/bundle/*.dmg
+          retention-days: 7
+          if-no-files-found: warn
+
+  # 创建 GitHub Release
+  create-release:
+    name: Create GitHub Release
+    needs: [version-info, build-and-release, create-universal-macos]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ./artifacts
+
+      - name: Prepare release assets
+        run: |
+          mkdir -p ./release-assets
+
+          # 复制所有安装包和签名文件（包含 AppImage.tar.gz 更新包）
+          find ./artifacts -type f \( \
+            -name "*.msi" -o \
+            -name "*.msi.zip" -o \
+            -name "*.app.tar.gz" -o \
+            -name "*.dmg" -o \
+            -name "*.AppImage" -o \
+            -name "*.AppImage.tar.gz" -o \
+            -name "*.deb" -o \
+            -name "*.sig" \
+          \) -exec cp {} ./release-assets/ \;
+
+          # 生成统一的 latest.json（使用 jq 确保正确的 JSON 格式）
+          VERSION="${{ needs.version-info.outputs.version }}"
+          VERSION_NO_V="${VERSION#v}"
+          PUB_DATE="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+
+          # 辅助函数：读取签名文件
+          get_sig() {
+            local sig_file=$(find ./release-assets -name "$1.sig" -type f 2>/dev/null | head -n 1)
+            if [ -n "$sig_file" ]; then
+              cat "$sig_file" | tr -d '\n\r \t'
+            else
+              echo ""
+            fi
+          }
+
+          # 使用 jq 生成 JSON（URL 中使用带 v 前缀的 VERSION）
+          jq -n \
+            --arg version "$VERSION_NO_V" \
+            --arg tag "$VERSION" \
+            --arg notes "https://github.com/let5sne/claw-config/releases/tag/${VERSION}" \
+            --arg pub_date "$PUB_DATE" \
+            --arg win_sig "$(get_sig "claw-config_${VERSION_NO_V}_x64_en-US.msi.zip")" \
+            --arg mac_x64_sig "$(get_sig "claw-config_${VERSION_NO_V}_x64.app.tar.gz")" \
+            --arg mac_arm_sig "$(get_sig "claw-config_${VERSION_NO_V}_aarch64.app.tar.gz")" \
+            --arg mac_uni_sig "$(get_sig "claw-config_${VERSION_NO_V}_universal.app.tar.gz")" \
+            --arg linux_sig "$(get_sig "claw-config_${VERSION_NO_V}_amd64.AppImage.tar.gz")" \
+            '{
+              version: $version,
+              notes: $notes,
+              pub_date: $pub_date,
+              platforms: {
+                "windows-x86_64": {
+                  signature: $win_sig,
+                  url: "https://github.com/let5sne/claw-config/releases/download/\($tag)/claw-config_\($version)_x64_en-US.msi.zip"
+                },
+                "darwin-x86_64": {
+                  signature: $mac_x64_sig,
+                  url: "https://github.com/let5sne/claw-config/releases/download/\($tag)/claw-config_\($version)_x64.app.tar.gz"
+                },
+                "darwin-aarch64": {
+                  signature: $mac_arm_sig,
+                  url: "https://github.com/let5sne/claw-config/releases/download/\($tag)/claw-config_\($version)_aarch64.app.tar.gz"
+                },
+                "darwin-universal": {
+                  signature: $mac_uni_sig,
+                  url: "https://github.com/let5sne/claw-config/releases/download/\($tag)/claw-config_\($version)_universal.app.tar.gz"
+                },
+                "linux-x86_64": {
+                  signature: $linux_sig,
+                  url: "https://github.com/let5sne/claw-config/releases/download/\($tag)/claw-config_\($version)_amd64.AppImage.tar.gz"
+                }
+              }
+            }' > ./release-assets/latest.json
+
+      - name: Generate release notes
+        id: release_notes
+        run: |
+          VERSION="${{ needs.version-info.outputs.version }}"
+          cat > release_notes.md << EOF
+          ## 🎉 Claw Config ${VERSION}
+
+          ### 📦 下载说明
+
+          **Windows**:
+          - \`claw-config_${VERSION}_x64_en-US.msi\` - Windows 安装程序
+
+          **macOS**:
+          - \`claw-config_${VERSION}_x64.dmg\` - Intel Mac 安装程序
+          - \`claw-config_${VERSION}_aarch64.dmg\` - Apple Silicon Mac 安装程序
+          - \`claw-config_${VERSION}_universal.dmg\` - Universal Mac 安装程序
+
+          **Linux**:
+          - \`claw-config_${VERSION}_amd64.AppImage\` - 通用 Linux 可执行文件
+          - \`claw-config_${VERSION}_amd64.deb\` - Debian/Ubuntu 安装包
+
+          ### 🔐 签名验证
+
+          所有构建产物均使用 Tauri 私钥签名验证。
+
+          ### 📝 更新内容
+
+          查看提交历史了解详细变更：https://github.com/let5sne/claw-config/commits/main
+          EOF
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Claw Config ${{ needs.version-info.outputs.version }}
+          body_path: release_notes.md
+          draft: false
+          prerelease: ${{ needs.version-info.outputs.is_prerelease == 'true' }}
+          files: ./release-assets/*
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

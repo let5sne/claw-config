@@ -45,7 +45,7 @@
 ## 📁 项目结构
 
 ```
-openclaw-switch/
+claw-config/
 ├── src/
 │   ├── components/
 │   │   ├── providers/
@@ -91,7 +91,7 @@ openclaw-switch/
 
 ### 开发模式
 ```bash
-cd openclaw-switch
+cd claw-config
 npm run tauri dev
 ```
 或双击 `dev-switch.bat`
