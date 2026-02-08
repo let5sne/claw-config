@@ -1,87 +1,103 @@
-# 🦐 OpenClaw Switch
+# 🦐 Claw Config
 
-OpenClaw 配置管理工具 - 一个桌面应用，用于可视化配置 OpenClaw 的 `openclaw.json` 文件。
+A desktop application for visually configuring OpenClaw's `openclaw.json` file.
 
-## ✨ 功能
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![i18n](https://img.shields.io/badge/i18n-4%20languages-blue)](#internationalization)
 
-- **Provider 管理**: 可视化添加/编辑/删除模型提供商
-  - 支持多个主流 AI 服务商
-  - 预设配置快速添加
-  - 实时模型列表同步
+**[中文](README.zh.md) | [日本語](README.ja.md) | [한국어](README.ko.md)**
 
-- **Agents 配置**: 配置 OpenClaw Agents 默认行为
-  - 模型分层配置
-  - 并发数调优
-  - 性能参数设置
+## ✨ Features
 
-- **配置管理**
-  - 实时保存到 `~/.openclaw/openclaw.json`
-  - 配置备份与恢复
-  - 安全的 API Key 管理
+### Provider Management
+- Visually add/edit/delete model providers
+- Support for multiple mainstream AI service providers
+- Quick addition with preset configurations
+- Real-time model list synchronization
 
-## 🛠️ 技术栈
+### Agents Configuration
+- Configure OpenClaw Agents default behavior
+- Model tier configuration (primary, fast, balanced, powerful)
+- Concurrency optimization
+- Performance parameter tuning
 
-- **桌面框架**: Tauri 2.8
-- **后端**: Rust
-- **前端**: React 18 + TypeScript
-- **UI**: TailwindCSS + 自定义组件
-- **状态管理**: TanStack Query v5
+### Configuration Management
+- Real-time save to `~/.openclaw/openclaw.json`
+- Configuration backup and restore
+- Secure API Key management
 
-## 📦 开发
+### Internationalization (i18n)
+- Support for 4 languages: English, Chinese (中文), Japanese (日本語), Korean (한국어)
+- Language selection persisted in browser storage
+- Automatic browser language detection
 
-### 前提条件
+## 🛠️ Tech Stack
+
+- **Desktop Framework**: Tauri 2.8
+- **Backend**: Rust
+- **Frontend**: React 18 + TypeScript
+- **UI**: TailwindCSS + shadcn/ui components
+- **State Management**: TanStack Query v5
+- **Internationalization**: i18next, react-i18next
+
+## 📦 Development
+
+### Prerequisites
 
 - Node.js 18+
 - Rust 1.70+
 - Tauri CLI 2.8+
 
-### 快速开始
+### Quick Start
 
-1. **安装依赖**
+1. **Install dependencies**
    ```bash
-   cd openclaw-switch
+   cd claw-config
    npm install
    ```
 
-2. **开发模式**
+2. **Development mode**
    ```bash
    npm run tauri dev
    ```
-   或双击运行 `../dev-switch.bat`
+   Or double-click `../dev-switch.bat`
 
-3. **构建应用**
+3. **Build application**
    ```bash
    npm run tauri build
    ```
-   或双击运行 `../build-switch.bat`
+   Or double-click `../build-switch.bat`
 
-## 📁 项目结构
+## 📁 Project Structure
 
 ```
-openclaw-switch/
-├── src/                      # React 前端
-│   ├── components/           # UI 组件
-│   │   ├── providers/        # Provider 管理
-│   │   ├── agents/           # Agents 配置
-│   │   └── ui/               # 基础组件
-│   ├── hooks/                # 自定义 Hooks
-│   ├── lib/api.ts            # API 封装
-│   └── types/               # 类型定义
-├── src-tauri/                # Rust 后端
+claw-config/
+├── src/                      # React frontend
+│   ├── components/           # UI components
+│   │   ├── providers/        # Provider management
+│   │   ├── agents/           # Agents configuration
+│   │   └── ui/               # Base components
+│   ├── hooks/                # Custom Hooks
+│   ├── i18n/                 # Internationalization
+│   │   ├── config.ts         # i18n configuration
+│   │   └── locales/          # Translation files
+│   ├── lib/api.ts            # API wrapper
+│   └── types/                # Type definitions
+├── src-tauri/                # Rust backend
 │   ├── src/
-│   │   ├── commands/         # Tauri 命令
-│   │   ├── service.rs        # 配置服务
-│   │   ├── models.rs         # 数据模型
-│   │   └── error.rs          # 错误类型
+│   │   ├── commands.rs       # Tauri commands
+│   │   ├── service.rs        # Configuration service
+│   │   ├── models.rs         # Data models
+│   │   └── error.rs          # Error types
 │   └── Cargo.toml
-└── tauri.conf.json          # Tauri 配置
+└── tauri.conf.json           # Tauri configuration
 ```
 
-## 🔧 配置文件
+## 🔧 Configuration File
 
-OpenClaw 配置文件位置：`~/.openclaw/openclaw.json`
+OpenClaw configuration file location: `~/.openclaw/openclaw.json`
 
-### 主要配置项
+### Main Configuration Options
 
 #### models.providers
 ```json
@@ -120,29 +136,47 @@ OpenClaw 配置文件位置：`~/.openclaw/openclaw.json`
 }
 ```
 
-## 🎯 支持的 Provider
+## 🎯 Supported Providers
 
-- **Anthropic Claude**: 官方 Claude 模型
-- **OpenAI**: GPT-4o、GPT-4o Mini、o1-preview
-- **Ollama**: 本地模型（Llama、Qwen、DeepSeek Coder）
-- **智谱 GLM**: GLM-4 Plus/Air/Flash
-- **Kimi (Moonshot)**: Moonshot v1 系列
+- **Anthropic Claude**: Official Claude models
+- **OpenAI**: GPT-4o, GPT-4o Mini, o1-preview
+- **Ollama**: Local models (Llama, Qwen, DeepSeek Coder)
+- **Zhipu GLM**: GLM-4 Plus/Air/Flash
+- **Kimi (Moonshot)**: Moonshot v1 series
 
-## 📝 开发说明
+## 🌍 Internationalization
 
-### 添加新 Provider
+Claw Config supports the following languages:
 
-1. 在 `src/types/index.ts` 中添加预设配置
-2. UI 会自动显示在添加 Provider 下拉列表中
+| Language | Code | File |
+|----------|------|------|
+| English | `en` | `src/i18n/locales/en.json` |
+| 中文 | `zh` | `src/i18n/locales/zh.json` |
+| 日本語 | `ja` | `src/i18n/locales/ja.json` |
+| 한국어 | `ko` | `src/i18n/locales/ko.json` |
 
-### 添加新功能
+### Adding a New Language
 
-1. **Rust 后端**: 在 `src-tauri/src/commands.rs` 添加命令
-2. **前端 API**: 在 `src/lib/api.ts` 添加 API 函数
-3. **React Hooks**: 在 `src/hooks/` 创建自定义 Hook
-4. **UI 组件**: 在 `src/components/` 创建组件
+1. Create a new translation file in `src/i18n/locales/[code].json`
+2. Update `src/i18n/config.ts` to import and register the new language
+3. Add the language option to `src/components/LanguageSelector.tsx`
 
-## 📄 许可证
+## 📝 Development Notes
+
+### Adding a New Provider
+
+1. Add preset configuration in `src/types/index.ts`
+2. The UI will automatically display it in the "Add Provider" dropdown
+
+### Adding New Features
+
+1. **Rust Backend**: Add commands in `src-tauri/src/commands.rs`
+2. **Frontend API**: Add API functions in `src/lib/api.ts`
+3. **React Hooks**: Create custom hooks in `src/hooks/`
+4. **UI Components**: Create components in `src/components/`
+5. **Translations**: Add translation keys to all locale files
+
+## 📄 License
 
 MIT License
 
