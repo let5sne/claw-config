@@ -165,7 +165,13 @@ jobs:
           sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
 
       - name: Build app
-        run: npm run tauri:build -- --target ${{ matrix.target }}
+        run: |
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            npm run tauri:build
+          else
+            npm run tauri:build -- --target ${{ matrix.target }}
+          fi
+        shell: bash
         env:
           TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
           TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}

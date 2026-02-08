@@ -49,7 +49,7 @@ jobs:
           - os: windows-latest
             target: x86_64-pc-windows-msvc
             artifacts: '*.msi.zip'
-            args: '--target x86_64-pc-windows-msvc'
+            args: ''
 
           # macOS Intel
           - os: macos-latest
@@ -101,7 +101,13 @@ jobs:
         run: npm run build
 
       - name: Build Tauri app
-        run: npm run tauri:build -- ${{ matrix.args }}
+        run: |
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            npm run tauri:build
+          else
+            npm run tauri:build -- ${{ matrix.args }}
+          fi
+        shell: bash
         env:
           TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
           TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
