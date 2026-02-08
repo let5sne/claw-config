@@ -119,9 +119,10 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: claw-config-${{ matrix.target }}
-          path: src-tauri/target/${{ matrix.target }}/release/bundle/msi/*.msi
-          retention-days: 7
-          if-no-files-found: warn
+          path: |
+            src-tauri/target/${{ matrix.target }}/release/bundle/msi/
+            src-tauri/target/${{ matrix.target }}/release/bundle/*.msi
+          if-no-files-found: error
 
       - name: Upload artifacts (Unix)
         if: matrix.os != 'windows-latest'
@@ -129,13 +130,9 @@ jobs:
         with:
           name: claw-config-${{ matrix.target }}
           path: |
-            src-tauri/target/${{ matrix.target }}/release/bundle/*.dmg
-            src-tauri/target/${{ matrix.target }}/release/bundle/*.app.tar.gz
-            src-tauri/target/${{ matrix.target }}/release/bundle/*.AppImage
-            src-tauri/target/${{ matrix.target }}/release/bundle/*.AppImage.tar.gz
-            src-tauri/target/${{ matrix.target }}/release/bundle/*.deb
-          retention-days: 7
-          if-no-files-found: warn
+            src-tauri/target/${{ matrix.target }}/release/bundle/
+          if-no-files-found: error
+        continue-on-error: false
 
   # 创建 GitHub Release (universal macOS)
   create-universal-macos:
@@ -177,15 +174,17 @@ jobs:
           TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
           TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
 
+      - name: List universal build outputs
+        run: |
+          echo "=== Universal build output directory ==="
+          ls -R src-tauri/target/universal-apple-darwin/release/bundle/ || true
+
       - name: Upload universal macOS artifact
         uses: actions/upload-artifact@v4
         with:
           name: claw-config-universal-apple-darwin
-          path: |
-            src-tauri/target/universal-apple-darwin/release/bundle/*.app.tar.gz
-            src-tauri/target/universal-apple-darwin/release/bundle/*.dmg
-          retention-days: 7
-          if-no-files-found: warn
+          path: src-tauri/target/universal-apple-darwin/release/bundle/
+          if-no-files-found: error
 
   # 创建 GitHub Release
   create-release:
@@ -209,15 +208,24 @@ jobs:
 
       - name: List downloaded artifacts
         run: |
+          echo "=== Artifacts directory structure ==="
+          ls -R ./artifacts/ || echo "No artifacts directory found"
+          echo ""
           echo "=== All downloaded files ==="
-          find ./artifacts -type f
+          find ./artifacts -type f || echo "No files found"
           echo ""
           echo "=== Files by extension ==="
-          find ./artifacts -type f -name "*.msi" -o -name "*.msi.zip" -o -name "*.app.tar.gz" -o -name "*.dmg" -o -name "*.AppImage" -o -name "*.deb" || true
+          find ./artifacts -type f \( -name "*.msi" -o -name "*.msi.zip" -o -name "*.app.tar.gz" -o -name "*.dmg" -o -name "*.AppImage" -o -name "*.deb" \) || echo "No package files found"
 
       - name: Prepare release assets
         run: |
           mkdir -p ./release-assets
+
+          # 检查 artifacts 目录是否存在
+          if [ ! -d "./artifacts" ]; then
+            echo "ERROR: artifacts directory not found!"
+            exit 1
+          fi
 
           # 复制所有安装包和签名文件（支持 Windows 路径）
           find ./artifacts -type f \( \
@@ -233,6 +241,13 @@ jobs:
 
           echo "=== Files copied to release-assets ==="
           ls -la ./release-assets/
+
+          # 检查是否有文件被复制
+          if [ -z "$(ls -A ./release-assets)" ]; then
+            echo "ERROR: No files were copied to release-assets!"
+            find ./artifacts -type f || true
+            exit 1
+          fi
 
           # 生成 latest.json（简化版本，不依赖签名文件）
           VERSION="${{ needs.version-info.outputs.version }}"
