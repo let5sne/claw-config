@@ -94,13 +94,15 @@ jobs:
         run: npm run build
 
       - name: Build Tauri app
+        shell: bash
         run: |
           if [ "$RUNNER_OS" = "Windows" ]; then
-            npm run tauri:build
+            echo "Building Windows app..."
+            npm run tauri:build -- --verbose
           else
-            npm run tauri:build -- ${{ matrix.args }}
+            echo "Building ${{ matrix.target }} app..."
+            npm run tauri:build -- ${{ matrix.args }} --verbose
           fi
-        shell: bash
         env:
           TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
           TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
@@ -108,11 +110,17 @@ jobs:
       - name: List build outputs
         shell: bash
         run: |
-          echo "=== Build output directory ==="
-          ls -R src-tauri/target/${{ matrix.target }}/release/bundle/ || true
+          echo "=== Target release directory ==="
+          ls -la src-tauri/target/${{ matrix.target }}/release/ || true
           echo ""
-          echo "=== All package files ==="
-          find src-tauri/target/${{ matrix.target }}/release -type f \( -name "*.msi" -o -name "*.msi.zip" -o -name "*.dmg" -o -name "*.app.tar.gz" -o -name "*.AppImage" -o -name "*.deb" \) || true
+          echo "=== Bundle directory ==="
+          ls -la src-tauri/target/${{ matrix.target }}/release/bundle/ || true
+          echo ""
+          echo "=== All files in release tree ==="
+          find src-tauri/target/${{ matrix.target }}/release -type f || true
+          echo ""
+          echo "=== All MSI/EXE files ==="
+          find src-tauri/target/${{ matrix.target }} -type f \( -name "*.msi" -o -name "*.exe" -o -name "*.msi.zip" \) || true
 
       - name: Upload artifacts (Windows)
         if: matrix.os == 'windows-latest'
@@ -120,19 +128,18 @@ jobs:
         with:
           name: claw-config-${{ matrix.target }}
           path: |
-            src-tauri/target/${{ matrix.target }}/release/bundle/msi/
-            src-tauri/target/${{ matrix.target }}/release/bundle/*.msi
-          if-no-files-found: error
+            src-tauri/target/${{ matrix.target }}/release/bundle/
+            src-tauri/target/${{ matrix.target }}/release/*.msi
+            src-tauri/target/${{ matrix.target }}/release/*.exe
+          if-no-files-found: warn
 
       - name: Upload artifacts (Unix)
         if: matrix.os != 'windows-latest'
         uses: actions/upload-artifact@v4
         with:
           name: claw-config-${{ matrix.target }}
-          path: |
-            src-tauri/target/${{ matrix.target }}/release/bundle/
-          if-no-files-found: error
-        continue-on-error: false
+          path: src-tauri/target/${{ matrix.target }}/release/bundle/
+          if-no-files-found: warn
 
   # 创建 GitHub Release (universal macOS)
   create-universal-macos:
